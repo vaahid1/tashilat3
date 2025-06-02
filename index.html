@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه گر تسهیلات شایان و نیک وام</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f7fafc; /* bg-gray-100 */
+        }
+        .input-persian {
+            text-align: right;
+        }
+        input[type="text"]::placeholder {
+            color: #a0aec0; /* text-gray-500 */
+        }
+        .rtl-grid {
+          direction: rtl;
+        }
+        .result-item {
+            border-bottom: 1px solid #e2e8f0; /* border-gray-300 */
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .rate-section {
+            border: 1px solid #cbd5e0; /* border-gray-400 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1rem; /* p-4 */
+            margin-bottom: 1.5rem; /* mb-6 */
+        }
+        .rate-section-title {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            color: #4a5568; /* text-gray-700 */
+            margin-bottom: 0.75rem; /* mb-3 */
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0; /* border-gray-300 */
+            padding-bottom: 0.5rem; /* pb-2 */
+        }
+        .footer-list {
+            list-style: none;
+            padding: 0;
+            text-align: right; /* Ensure list items are right-aligned */
+        }
+        .footer-list li {
+            margin-bottom: 0.25rem; /* mb-1 */
+        }
+        .footer-section {
+            margin-top: 1rem; /* mt-4 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-3xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-4">محاسبه‌گر تسهیلات شایان و نیک وام</h1>
+        </header>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 rtl-grid">
+                <div>
+                    <label for="loanType" class="block text-sm font-medium text-gray-700">نوع طرح تسهیلات:</label>
+                    <select id="loanType" name="loanType" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="nik">طرح نیک وام</option>
+                        <option value="shayan1">طرح شایان ۱</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="depositDuration" class="block text-sm font-medium text-gray-700">مدت زمان سپرده‌گذاری:</label>
+                    <select id="depositDuration" name="depositDuration" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="1">۱ ماه</option>
+                        <option value="2">۲ ماه</option>
+                        <option value="3">۳ ماه</option>
+                        <option value="4">۴ ماه</option>
+                        <option value="6">۶ ماه</option>
+                        <option value="12">۱۲ ماه</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="creditRating" class="block text-sm font-medium text-gray-700">رتبه اعتباری:</label>
+                    <select id="creditRating" name="creditRating" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="depositAmount" class="block text-sm font-medium text-gray-700">مبلغ سپرده‌گذاری (تومان):</label>
+                    <input type="text" id="depositAmount" name="depositAmount" inputmode="numeric" class="input-persian mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="مثلاً ۱٬۰۰۰٬۰۰۰">
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <button id="calculateButton" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                    محاسبه تسهیلات
+                </button>
+            </div>
+        </div>
+
+        <div id="resultsArea" class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center">نتایج محاسبه</h2>
+            <div id="resultsContent" class="text-sm sm:text-base text-gray-600">
+                <p class="text-center">لطفاً اطلاعات فوق را وارد کرده و دکمه محاسبه را بزنید.</p>
+            </div>
+        </div>
+
+        <footer class="mt-12 text-center text-sm text-gray-700 leading-relaxed">
+            <p class="mb-3 text-red-600 font-semibold">مشتری محترم شما می توانید تا سقف یک میلیارد تومان امتیاز ایجاد نمایید که از این میزان، امکان دریافت مستقیم تا مبلغ ۳۰۰ میلیون تومان برای تسهیلات نیک وام و ۶۰۰ میلیون تومان برای تسهیلات شایان (جعاله و مرابحه یا کارت اعتباری) برای شما فراهم است و باقی‌مانده امتیاز قابل انتقال به سایر افراد خواهد بود.</p>
+            
+            <div class="footer-section">
+                <h4 class="font-semibold text-base mb-2 text-gray-800">روش‌های افتتاح حساب:</h4>
+                <ul class="footer-list">
+                    <li>- مراجعه حضوری به شعب بانک در سراسر کشور</li>
+                    <li>- سامانه بانکداری اینترنتی (<a href="http://www.ebanking.bankmellat" target="_blank" class="text-indigo-600 hover:underline">www.ebanking.bankmellat</a>)</li>
+                    <li>- اپلیکیشن همراه بانک ملت</li>
+                    <li>- پیشخوان الکترونیک بانک ملت (<a href="https://pishkhan.bankmellat.ir" target="_blank" class="text-indigo-600 hover:underline">https://pishkhan.bankmellat.ir</a>)</li>
+                    <li>- برنامه کاربردی مگابانک</li>
+                </ul>
+            </div>
+
+            <div class="footer-section mt-4">
+                 <h4 class="font-semibold text-base mb-2 text-gray-800">نوبت‌دهی آنلاین جهت مراجعه حضوری:</h4>
+                 <p>شما می توانید به منظور مراجعه حضوری به شعب از طریق سامانه نوبت دهی آنلاین از طریق:</p>
+                 <ul class="footer-list mt-1">
+                    <li>- سامانه نوبت‌دهی غیرحضوری بانک ملت (بستام): <a href="https://bastam.bankmellat.ir/bastam/turnGiving_service" target="_blank" class="text-indigo-600 hover:underline">https://bastam.bankmellat.ir</a></li>
+                    <li>- و یا همراه بانک ملت نوبت آنلاین بگیرید.</li>
+                 </ul>
+            </div>
+            
+            <p class="mt-6 text-xs text-gray-500">طراحی توسط وحید شاه میرزایی</p>
+        </footer>
+    </div>
+
+    <script>
+        const loanTypeSelect = document.getElementById('loanType');
+        const depositDurationSelect = document.getElementById('depositDuration');
+        const creditRatingSelect = document.getElementById('creditRating');
+        const depositAmountInput = document.getElementById('depositAmount');
+        const calculateButton = document.getElementById('calculateButton');
+        const resultsContent = document.getElementById('resultsContent');
+        
+        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+        function toPersianNumeral(n) {
+            if (n === null || n === undefined) return '';
+            return String(n).replace(/\d/g, d => persianDigits[parseInt(d)]);
+        }
+
+        function formatNumberWithPersianSeparators(num) {
+            if (isNaN(num) || num === null) return '';
+            let formatted = Number(num).toLocaleString('en-US', { maximumFractionDigits: 0 });
+            return formatted.replace(/\d/g, d => persianDigits[parseInt(d)]).replace(/,/g, '٬');
+        }
+        
+        depositAmountInput.addEventListener('input', function (e) {
+            let value = e.target.value;
+            let latinValue = value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+                                 .replace(/[^\d]/g, ''); 
+
+            if (latinValue) {
+                const number = parseInt(latinValue, 10);
+                if (!isNaN(number)) {
+                    let formattedWithLatinSeparators = number.toLocaleString('en-US');
+                    e.target.value = formattedWithLatinSeparators
+                                        .replace(/\d/g, d => persianDigits[parseInt(d)])
+                                        .replace(/,/g, '٬');
+                } else {
+                    e.target.value = '';
+                }
+            } else {
+                e.target.value = '';
+            }
+        });
+
+        function getCleanedAmount() {
+            let value = depositAmountInput.value;
+            value = value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+            value = value.replace(/[٬,]/g, '');
+            const amount = parseFloat(value);
+            return isNaN(amount) ? 0 : amount;
+        }
+
+        calculateButton.addEventListener('click', function() {
+            const loanType = loanTypeSelect.value;
+            const duration = parseInt(depositDurationSelect.value);
+            const rating = creditRatingSelect.value;
+            const amount = getCleanedAmount();
+
+            resultsContent.innerHTML = ''; 
+
+            if (amount <= 0) {
+                resultsContent.innerHTML = '<p class="text-red-500 text-center">لطفاً مبلغ سپرده‌گذاری معتبری وارد کنید.</p>';
+                return;
+            }
+
+            let resultsHtml = `<p class="mb-3 text-center">مبلغ سپرده: <strong>${formatNumberWithPersianSeparators(amount)} تومان</strong></p>`;
+            resultsHtml += `<p class="mb-3 text-center">رتبه اعتباری: <strong>${toPersianNumeral(rating)}</strong></p>`;
+            resultsHtml += `<p class="mb-3 text-center">مدت سپرده: <strong>${toPersianNumeral(duration)} ماه</strong></p>`;
+
+            if (loanType === 'nik') {
+                resultsHtml += `<h3 class="font-semibold text-lg mb-2 text-center">نتایج برای طرح نیک وام:</h3>`;
+                const calculatedResults = calculateNikLoan(duration, rating, amount);
+                 if (calculatedResults.length === 0) {
+                    resultsHtml += '<p class="text-orange-600 text-center result-item">شرایطی برای این حالت در طرح نیک وام یافت نشد.</p>';
+                } else {
+                    calculatedResults.forEach(res => {
+                        resultsHtml += `<div class="result-item text-center py-2">می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong> تسهیلات با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> <span class="font-semibold">با نرخ کارمزد ۴٪ (قرض‌الحسنه)</span> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</div>`;
+                    });
+                }
+            } else if (loanType === 'shayan1') {
+                resultsHtml += `<h3 class="font-semibold text-xl mb-4 text-center underline">نتایج برای طرح شایان ۱ (نرخ کارمزد نهایی ۲۳٪)</h3>`;
+                let shayanHasResults = false;
+
+                // Section for 23% internal rate category
+                const results23 = calculateShayan23RateRules(duration, rating, amount);
+                if (results23.length > 0) {
+                    shayanHasResults = true;
+                    resultsHtml += `<div class="rate-section">`;
+                    resultsHtml += `<h4 class="rate-section-title">جزئیات محاسبه بر اساس دسته‌بندی نرخ داخلی ۲۳٪</h4>`;
+                    results23.forEach(res => {
+                        let loanDescription = res.description_suffix ? ` ${res.description_suffix}` : " تسهیلات";
+                        resultsHtml += `<div class="result-item text-center py-2">می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong>${loanDescription} با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</div>`;
+                    });
+                    resultsHtml += `</div>`;
+                }
+
+                // Section for 18% internal rate category
+                const results18 = calculateShayan18RateRules(duration, rating, amount);
+                if (results18.length > 0) {
+                    shayanHasResults = true;
+                    resultsHtml += `<div class="rate-section">`;
+                    resultsHtml += `<h4 class="rate-section-title">جزئیات محاسبه بر اساس دسته‌بندی نرخ داخلی ۱۸٪</h4>`;
+                    results18.forEach(res => {
+                        let loanDescription = res.description_suffix ? ` ${res.description_suffix}` : " تسهیلات";
+                        resultsHtml += `<div class="result-item text-center py-2">می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong>${loanDescription} با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</div>`;
+                    });
+                    resultsHtml += `</div>`;
+                }
+
+                // Section for 14% internal rate category
+                const results14 = calculateShayan14RateRules(duration, rating, amount);
+                if (results14.length > 0) {
+                    shayanHasResults = true;
+                    resultsHtml += `<div class="rate-section">`;
+                    resultsHtml += `<h4 class="rate-section-title">جزئیات محاسبه بر اساس دسته‌بندی نرخ داخلی ۱۴٪</h4>`;
+                    results14.forEach(res => {
+                        let loanDescription = res.description_suffix ? ` ${res.description_suffix}` : " تسهیلات";
+                        resultsHtml += `<div class="result-item text-center py-2">می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong>${loanDescription} با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</div>`;
+                    });
+                    resultsHtml += `</div>`;
+                }
+                
+                if (!shayanHasResults) {
+                     if (duration === 4 || duration === 12) {
+                        resultsHtml += `<p class="text-blue-600 text-center result-item mt-4">برای طرح شایان ۱ با سپرده‌گذاری ${toPersianNumeral(duration)} ماهه، جزئیات محاسبه بر اساس نرخ‌های داخلی مشخص (۲۳٪، ۱۸٪، ۱۴٪) در حال حاضر تعریف نشده است. برای اطلاع از سایر شرایط عمومی طرح شایان ۱ برای این مدت، لطفاً با شعبه تماس بگیرید.</p>`;
+                    } else {
+                        resultsHtml += `<p class="text-orange-600 text-center result-item mt-4">شرایطی برای طرح شایان ۱ با مشخصات انتخابی یافت نشد.</p>`;
+                    }
+                }
+            }
+            resultsContent.innerHTML = resultsHtml;
+        });
+
+        function calculateNikLoan(duration, rating, amount) {
+            const results = [];
+            const addResult = (percentage, years, condition = null) => {
+                results.push({ loanAmount: Math.floor(amount * percentage), years: years, condition: condition });
+            };
+            
+            switch (duration) {
+                case 1: 
+                    addResult(0.27, 1); addResult(0.15, 2); addResult(0.10, 3);
+                    break;
+                case 2: 
+                    addResult(0.55, 1); addResult(0.30, 2); addResult(0.20, 3);
+                    if (rating === 'A' || rating === 'B') addResult(0.15, 4, 'ویژه رتبه‌های A و B');
+                    break;
+                case 3: 
+                    addResult(0.80, 1); 
+                    addResult(0.40, 2); 
+                    addResult(0.30, 3); 
+                    addResult(0.20, 4); 
+                    addResult(0.15, 5); 
+                    break;
+                case 4: 
+                    addResult(1.10, 1); addResult(0.55, 2); addResult(0.40, 3);
+                    if (rating === 'A' || rating === 'B') addResult(0.30, 4, 'ویژه رتبه‌های A و B');
+                    addResult(0.20, 5); 
+                    break;
+                case 6: 
+                    addResult(1.60, 1); addResult(0.80, 2); addResult(0.60, 3);
+                    if (rating === 'A' || rating === 'B') addResult(0.45, 4, 'ویژه رتبه‌های A و B');
+                    addResult(0.30, 5); 
+                    break;
+                case 12: 
+                    addResult(3.20, 1); addResult(1.60, 2); addResult(1.10, 3);
+                    if (rating === 'A' || rating === 'B') addResult(0.80, 4, 'ویژه رتبه‌های A و B');
+                    addResult(0.60, 5); 
+                    break;
+            }
+            return results;
+        }
+
+        function addShayanResult(resultsArray, percentage, years, amount, description_suffix = null, conditionText = null) {
+            resultsArray.push({
+                loanAmount: Math.floor(amount * percentage),
+                years: years,
+                description_suffix: description_suffix,
+                condition: conditionText
+            });
+        }
+
+        function calculateShayan23RateRules(duration, rating, amount) {
+            const results = [];
+            // Rules for 23% internal rate calculations
+            switch (duration) {
+                case 1:
+                    addShayanResult(results, 0.50, 1, amount, "تسهیلات اقساطی"); 
+                    break;
+                case 2: 
+                    if (rating === 'A' || rating === 'B') addShayanResult(results, 1.50, 1, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                    if (rating === 'C') addShayanResult(results, 1.20, 1, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                    if (rating === 'A' || rating === 'B') addShayanResult(results, 0.55, 2, amount, "تسهیلات اقساطی", "ویژه رتبه‌های A و B");
+                    if (rating === 'C') addShayanResult(results, 0.45, 2, amount, "تسهیلات اقساطی", "ویژه رتبه C");
+                    if (rating === 'A' || rating === 'B') addShayanResult(results, 0.30, 3, amount, "تسهیلات اقساطی", "ویژه رتبه‌های A و B");
+                    if (rating === 'A' || rating === 'B') addShayanResult(results, 3.00, 1, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                    if (rating === 'C') addShayanResult(results, 2.00, 1, amount, "کارت اعتباری", "ویژه رتبه C");
+                    if (rating === 'A' || rating === 'B') addShayanResult(results, 0.60, 2, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                    if (rating === 'C') addShayanResult(results, 0.50, 2, amount, "کارت اعتباری", "ویژه رتبه C");
+                    if (rating === 'A' || rating === 'B' || rating === 'C') addShayanResult(results, 0.35, 3, amount, "کارت اعتباری");
+                    break;
+                case 3: 
+                    if (rating === 'A' || rating === 'B') {
+                        addShayanResult(results, 2.00, 1, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 0.80, 2, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 0.50, 3, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 0.30, 4, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 4.50, 1, amount, "کارت اعتباری", "ویژه رتبه‌های A و B"); 
+                        addShayanResult(results, 1.00, 2, amount, "کارت اعتباری", "ویژه رتبه‌های A و B"); 
+                        addShayanResult(results, 0.60, 3, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 0.35, 4, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                    }
+                    if (rating === 'C') {
+                        addShayanResult(results, 1.75, 1, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                        addShayanResult(results, 0.70, 2, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                        addShayanResult(results, 0.40, 3, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                        addShayanResult(results, 3.00, 1, amount, "کارت اعتباری", "ویژه رتبه C"); 
+                        addShayanResult(results, 0.80, 2, amount, "کارت اعتباری", "ویژه رتبه C");
+                        addShayanResult(results, 0.50, 3, amount, "کارت اعتباری", "ویژه رتبه C");
+                    }
+                    break;
+                case 6: 
+                    if (rating === 'A' || rating === 'B') {
+                        addShayanResult(results, 1.50, 2, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 1.10, 3, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 0.75, 4, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 2.00, 2, amount, "کارت اعتباری", "ویژه رتبه‌های A و B"); 
+                        addShayanResult(results, 1.25, 3, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                        addShayanResult(results, 0.75, 4, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                    }
+                    if (rating === 'C') {
+                        addShayanResult(results, 1.25, 2, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                        addShayanResult(results, 0.90, 3, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                        addShayanResult(results, 1.50, 2, amount, "کارت اعتباری", "ویژه رتبه C"); 
+                        addShayanResult(results, 1.00, 3, amount, "کارت اعتباری", "ویژه رتبه C"); 
+                    }
+                    break;
+            }
+            return results;
+        }
+
+        function calculateShayan18RateRules(duration, rating, amount) {
+            const results = [];
+            // Rules for 18% internal rate calculations
+            if (duration === 3) {
+                if (rating === 'A' || rating === 'B') {
+                    addShayanResult(results, 0.80, 1, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                    addShayanResult(results, 1.00, 1, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                }
+                if (rating === 'C') {
+                    addShayanResult(results, 0.70, 1, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                    addShayanResult(results, 0.90, 1, amount, "کارت اعتباری", "ویژه رتبه C");
+                }
+            } else if (duration === 6) {
+                if (rating === 'A' || rating === 'B') {
+                    addShayanResult(results, 1.70, 1, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                    addShayanResult(results, 0.75, 2, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                    addShayanResult(results, 0.50, 3, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                    addShayanResult(results, 2.00, 1, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                    addShayanResult(results, 0.70, 2, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                    addShayanResult(results, 0.45, 3, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                }
+                if (rating === 'C') {
+                    addShayanResult(results, 1.50, 1, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                    addShayanResult(results, 0.60, 2, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                    addShayanResult(results, 0.40, 3, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                    addShayanResult(results, 1.80, 1, amount, "کارت اعتباری", "ویژه رتبه C");
+                    addShayanResult(results, 0.55, 2, amount, "کارت اعتباری", "ویژه رتبه C");
+                }
+            }
+            return results;
+        }
+
+        function calculateShayan14RateRules(duration, rating, amount) {
+            const results = [];
+            // Rules for 14% internal rate calculations
+            if (duration === 6) {
+                if (rating === 'A' || rating === 'B') {
+                    addShayanResult(results, 0.90, 1, amount, "تسهیلات مرابحه", "ویژه رتبه‌های A و B");
+                    addShayanResult(results, 1.10, 1, amount, "کارت اعتباری", "ویژه رتبه‌های A و B");
+                }
+                if (rating === 'C') {
+                    addShayanResult(results, 0.75, 1, amount, "تسهیلات مرابحه", "ویژه رتبه C");
+                    addShayanResult(results, 0.90, 1, amount, "کارت اعتباری", "ویژه رتبه C");
+                    addShayanResult(results, 0.45, 2, amount, "کارت اعتباری", "ویژه رتبه C");
+                }
+            }
+            return results;
+        }
+
+    </script>
+</body>
+</html>
