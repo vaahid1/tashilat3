@@ -201,7 +201,7 @@
 
         <!-- Footer -->
         <footer class="mt-12 text-center text-sm text-gray-700 leading-relaxed">
-            <p class="mb-3 text-red-600 font-semibold">مشتری محترم شما می توانید تا سقف یک میلیارد تومان امتیاز ایجاد نمایید که از این میزان، امکان دریافت مستقیم تا مبلغ ۳۰۰ میلیون تومان برای تسهیلات نیک وام و ۶۰۰ میلیون تومان برای تسهیلات شایان (جعاله و مرابحه یا کارت اعتباری) برای شما فراهم است و باقی‌مانده امتیاز قابل انتقال به سایر افراد خواهد بود.</p>
+            <p class="mb-3 text-green-700 font-semibold">مشتری محترم شما می توانید تا سقف یک میلیارد تومان امتیاز ایجاد نمایید که از این میزان، امکان دریافت مستقیم تا مبلغ ۳۰۰ میلیون تومان برای تسهیلات نیک وام و ۶۰۰ میلیون تومان برای تسهیلات شایان (جعاله و مرابحه یا کارت اعتباری) برای شما فراهم است و باقی‌مانده امتیاز قابل انتقال به سایر افراد خواهد بود.</p>
             <div class="footer-section"><h4 class="font-semibold text-base mb-2 text-gray-800">روش‌های افتتاح حساب</h4><ul class="footer-list"><li>- مراجعه حضوری به شعب بانک در سراسر کشور</li><li>- سامانه بانکداری اینترنتی (<a href="http://www.ebanking.bankmellat.ir" target="_blank" class="text-indigo-600 hover:underline">www.ebanking.bankmellat.ir</a>)</li><li>- اپلیکیشن همراه بانک ملت</li><li>- پیشخوان الکترونیک بانک ملت (<a href="https://pishkhan.bankmellat.ir" target="_blank" class="text-indigo-600 hover:underline">https://pishkhan.bankmellat.ir</a>)</li><li>- برنامه کاربردی مگابانک</li></ul></div>
             <div class="footer-section mt-4"><h4 class="font-semibold text-base mb-2 text-gray-800">نوبت‌دهی آنلاین جهت مراجعه حضوری</h4><p>شما می توانید به منظور مراجعه حضوری به شعب از طریق سامانه نوبت دهی آنلاین از طریق:</p><ul class="footer-list mt-1"><li>- سامانه نوبت‌دهی غیرحضوری بانک ملت (بستام): <a href="https://bastam.bankmellat.ir/bastam/turnGiving_service" target="_blank" class="text-indigo-600 hover:underline">https://bastam.bankmellat.ir</a></li><li>- و یا همراه بانک ملت نوبت آنلاین بگیرید.</li></ul></div>
             <p class="mt-6 text-xs text-gray-500">طراحی توسط وحید شاه میرزایی</p><p class="mt-1 text-xs text-gray-500">میدان جمهوری اسلامی اصفهان</p>
@@ -232,6 +232,7 @@
         // General UI Elements
         const resultsContent = document.getElementById('resultsContent');
         const resultsAreaWrapper = document.getElementById('resultsAreaWrapper');
+        const resultsArea = document.getElementById('resultsArea');
         const shareContainer = document.getElementById('shareContainer');
         const shareButton = document.getElementById('shareButton');
         const shareText = document.getElementById('shareText');
@@ -262,7 +263,7 @@
 
         // --- Utility Functions ---
         function toPersianNumeral(n) { if (n === null || n === undefined) return ''; return String(n).replace(/\d/g, d => persianDigits[parseInt(d)]); }
-        function formatNumberWithPersianSeparators(num) { if (isNaN(num) || num === null) return ''; let formatted = Number(Math.round(num)).toLocaleString('en-US'); return formatted.replace(/\d/g, d => persianDigits[parseInt(d)]).replace(/,/g, '٬'); }
+        function formatNumberWithPersianSeparators(num) { if (isNaN(num) || num === null) return ''; let formatted = Number(Math.ceil(num)).toLocaleString('en-US'); return formatted.replace(/\d/g, d => persianDigits[parseInt(d)]).replace(/,/g, '٬'); }
         function setupNumericInput(inputElement) { inputElement.addEventListener('input', function (e) { let value = e.target.value; let latinValue = value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^\d]/g, ''); if (latinValue) { const number = parseInt(latinValue, 10); if (!isNaN(number)) { let formatted = number.toLocaleString('en-US'); e.target.value = formatted.replace(/\d/g, d => persianDigits[parseInt(d)]).replace(/,/g, '٬'); } else { e.target.value = ''; } } else { e.target.value = ''; } }); }
         function getCleanedAmount(inputElement) { let value = inputElement.value; value = value.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٬,]/g, ''); const amount = parseFloat(value); return isNaN(amount) ? 0 : amount; }
         
@@ -273,8 +274,6 @@
 
         // --- Tab Switching Logic ---
         function switchTab(activeTab, inactiveTab, activeCalc, inactiveCalc) { activeTab.classList.add('active'); inactiveTab.classList.remove('active'); activeCalc.classList.remove('hidden'); inactiveCalc.classList.add('hidden'); resultsContent.innerHTML = '<p class="text-center">لطفاً اطلاعات را وارد کرده و دکمه محاسبه را بزنید.</p>'; scrollIndicator.classList.add('hidden', 'opacity-0'); shareContainer.classList.add('hidden'); }
-        tab1.addEventListener('click', () => switchTab(tab1, tab2, calculator1, calculator2));
-        tab2.addEventListener('click', () => switchTab(tab2, tab1, calculator2, calculator1));
         
         // --- Modal & Share Logic ---
         closeModalButton.addEventListener('click', () => shareModal.style.display = 'none');
@@ -282,8 +281,14 @@
             shareText.textContent = 'در حال آماده‌سازی...';
             shareButton.disabled = true;
 
-            const canvas = await html2canvas(resultsAreaWrapper, { scale: 2, backgroundColor: '#ffffff', logging: false });
+            const shareFooter = document.createElement('p');
+            shareFooter.textContent = 'برای افتتاح حساب بصورت حضوری و یا دریافت اطلاعات بیشتر به شعب بانک ملت مراجعه کنید.';
+            shareFooter.className = 'mt-6 text-center text-xs text-gray-600 p-2 border-t border-gray-200';
+            resultsArea.appendChild(shareFooter);
+
+            const canvas = await html2canvas(resultsArea, { scale: 2, backgroundColor: '#ffffff', logging: false });
             
+            resultsArea.removeChild(shareFooter);
             shareText.textContent = 'اشتراک‌گذاری نتایج';
             shareButton.disabled = false;
             
@@ -292,9 +297,7 @@
                     const file = new File([blob], 'نتایج-تسهیلات.png', { type: 'image/png' });
                     try {
                         await navigator.share({ title: 'شرایط تسهیلات محاسبه شده', text: 'این شرایط تسهیلات برای شما محاسبه شده است.', files: [file] });
-                    } catch (err) {
-                        console.error("خطا در اشتراک‌گذاری:", err);
-                    }
+                    } catch (err) { console.error("خطا در اشتراک‌گذاری:", err); }
                 }, 'image/png');
             } else {
                 const imageUrl = canvas.toDataURL('image/png');
@@ -305,18 +308,18 @@
         });
 
         // --- Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+             switchTab(tab2, tab1, calculator2, calculator1);
+        });
+        tab1.addEventListener('click', () => switchTab(tab1, tab2, calculator1, calculator2));
+        tab2.addEventListener('click', () => switchTab(tab2, tab1, calculator2, calculator1));
         setupNumericInput(depositAmountInput);
         setupNumericInput(desiredLoanAmountInput);
 
         const handleCalculation = (hasResults, html) => {
             resultsContent.innerHTML = html;
-            if (hasResults) {
-                shareContainer.classList.remove('hidden');
-                setTimeout(checkScroll, 100);
-            } else {
-                 shareContainer.classList.add('hidden');
-                 scrollIndicator.classList.add('hidden', 'opacity-0');
-            }
+            if (hasResults) { shareContainer.classList.remove('hidden'); setTimeout(checkScroll, 100); } 
+            else { shareContainer.classList.add('hidden'); scrollIndicator.classList.add('hidden', 'opacity-0'); }
         };
 
         // --- Calculation Logic (Mode 1) ---
