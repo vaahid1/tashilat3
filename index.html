@@ -15,9 +15,13 @@
         .input-persian { text-align: right; }
         .rtl-grid { direction: rtl; }
         .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #e2e8f0;
             padding-top: 0.75rem;
             padding-bottom: 0.75rem;
+            gap: 1rem;
         }
         .result-item:last-child { border-bottom: none; }
         .rate-section {
@@ -91,6 +95,52 @@
         .calc-button {
             background-image: linear-gradient(to right, #4f46e5, #7c3aed);
         }
+        .installment-btn {
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .installment-btn:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .modal-content p {
+             margin-bottom: 0.75rem;
+             border-bottom: 1px dashed #e5e7eb;
+             padding-bottom: 0.75rem;
+        }
+         .modal-content p:last-of-type {
+             border-bottom: none;
+             margin-bottom: 0;
+         }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -214,7 +264,7 @@
     </div>
 
     <!-- Share Modal (Fallback) -->
-    <div id="shareModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4" style="display: none;">
+    <div id="shareModal" class="modal">
          <div class="bg-white rounded-lg shadow-xl p-6 text-center max-w-lg w-full">
              <h3 class="text-lg font-bold mb-4">تصویر نتایج</h3>
              <p class="text-sm mb-4">برای اشتراک‌گذاری، این تصویر را ذخیره یا دانلود کنید.</p>
@@ -222,6 +272,17 @@
              <a id="downloadLink" class="mt-4 inline-block bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg" download="نتایج-تسهیلات.png">دانلود تصویر</a>
              <button id="closeModalButton" class="mt-4 ml-2 bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">بستن</button>
          </div>
+    </div>
+    
+    <!-- Installment Modal -->
+    <div id="installmentModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-lg font-bold mb-4 text-center">محاسبه اقساط</h3>
+            <div id="installmentModalContent" class="text-sm"></div>
+            <div class="text-center mt-6">
+                 <button id="closeInstallmentModalButton" class="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">بستن</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -247,6 +308,10 @@
         const modalImageContainer = document.getElementById('modalImageContainer');
         const downloadLink = document.getElementById('downloadLink');
         const closeModalButton = document.getElementById('closeModalButton');
+        const installmentModal = document.getElementById('installmentModal');
+        const installmentModalContent = document.getElementById('installmentModalContent');
+        const closeInstallmentModalButton = document.getElementById('closeInstallmentModalButton');
+
 
         // Calculator 1 Elements
         const loanTypeSelect = document.getElementById('loanType');
@@ -277,6 +342,8 @@
         
         // --- Modal & Share Logic ---
         closeModalButton.addEventListener('click', () => shareModal.style.display = 'none');
+        closeInstallmentModalButton.addEventListener('click', () => installmentModal.style.display = 'none');
+
         shareButton.addEventListener('click', async () => {
             shareText.textContent = 'در حال آماده‌سازی...';
             shareButton.disabled = true;
@@ -339,10 +406,25 @@
             if (loanType === 'nik') {
                 resultsHtml += `<h3 class="font-semibold text-lg mb-2 text-center">نتایج برای طرح نیک وام:</h3>`;
                 const nikResults = calculateNikLoan(duration, rating, amount);
-                if (nikResults.length > 0) { hasResults = true; nikResults.forEach(res => { resultsHtml += `<div class="result-item text-center py-2">می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong> تسهیلات با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> <span class="font-semibold">با نرخ کارمزد ۴٪ (قرض‌الحسنه)</span> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</div>`; }); } else { resultsHtml += '<p class="text-orange-600 text-center result-item">شرایطی برای این حالت در طرح نیک وام یافت نشد.</p>'; }
+                if (nikResults.length > 0) { 
+                    hasResults = true; 
+                    nikResults.forEach(res => { 
+                        resultsHtml += `<div class="result-item"><span>می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong> تسهیلات با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> <span class="font-semibold">با نرخ کارمزد ۴٪</span> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</span><button class="installment-btn" data-loan-amount="${res.loanAmount}" data-years="${res.years}" data-plan-type="nik">محاسبه اقساط</button></div>`; 
+                    }); 
+                } else { resultsHtml += '<p class="text-orange-600 text-center result-item">شرایطی برای این حالت یافت نشد.</p>'; }
             } else if (loanType === 'shayan1') {
-                resultsHtml += `<h3 class="font-semibold text-xl mb-4 text-center underline">نتایج برای طرح شایان ۱ (نرخ کارمزد نهایی ۲۳٪)</h3>`;
-                const renderShayanResults = (rate, results) => { if (results.length > 0) { hasResults = true; resultsHtml += `<div class="rate-section"><h4 class="rate-section-title">جزئیات محاسبه بر اساس دسته‌بندی نرخ داخلی ${toPersianNumeral(rate)}٪</h4>`; results.forEach(res => { let loanDescription = res.description_suffix ? ` ${res.description_suffix}` : " تسهیلات"; resultsHtml += `<div class="result-item text-center py-2">می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong>${loanDescription} با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</div>`; }); resultsHtml += `</div>`; } };
+                resultsHtml += `<h3 class="font-semibold text-xl mb-4 text-center underline">نتایج برای طرح شایان ۱ (نرخ کارمزد ۲۳٪)</h3>`;
+                const renderShayanResults = (rate, results) => { 
+                    if (results.length > 0) { 
+                        hasResults = true; 
+                        resultsHtml += `<div class="rate-section"><h4 class="rate-section-title">جزئیات محاسبه بر اساس دسته‌بندی نرخ داخلی ${toPersianNumeral(rate)}٪</h4>`; 
+                        results.forEach(res => { 
+                            let loanDescription = res.description_suffix ? ` ${res.description_suffix}` : " تسهیلات"; 
+                            resultsHtml += `<div class="result-item"><span>می‌توانید <strong>${formatNumberWithPersianSeparators(res.loanAmount)} تومان</strong>${loanDescription} با بازپرداخت <strong>${toPersianNumeral(res.years)} ساله</strong> دریافت کنید${res.condition ? ` (${res.condition})` : ''}.</span><button class="installment-btn" data-loan-amount="${res.loanAmount}" data-years="${res.years}" data-plan-type="shayan">محاسبه اقساط</button></div>`; 
+                        }); 
+                        resultsHtml += `</div>`; 
+                    } 
+                };
                 renderShayanResults(23, calculateShayan23RateRules(duration, rating, amount));
                 renderShayanResults(18, calculateShayan18RateRules(duration, rating, amount));
                 renderShayanResults(14, calculateShayan14RateRules(duration, rating, amount));
@@ -373,12 +455,12 @@
 
             let hasAnyResults = false;
             let nikHtml = '';
-            finalScenarios.filter(s => s.plan === 'nik').forEach(s => { hasAnyResults = true; nikHtml += `<div class="result-item text-center py-2">با سپرده‌گذاری <strong>${formatNumberWithPersianSeparators(s.requiredDeposit)} تومان</strong> به مدت <strong>${toPersianNumeral(s.duration)} ماه</strong>، می‌توانید این وام را با بازپرداخت <strong>${toPersianNumeral(s.years)} ساله</strong> دریافت کنید.</div>`; });
+            finalScenarios.filter(s => s.plan === 'nik').forEach(s => { hasAnyResults = true; nikHtml += `<div class="result-item"><span>با سپرده‌گذاری <strong>${formatNumberWithPersianSeparators(s.requiredDeposit)} تومان</strong> به مدت <strong>${toPersianNumeral(s.duration)} ماه</strong>، می‌توانید این وام را با بازپرداخت <strong>${toPersianNumeral(s.years)} ساله</strong> دریافت کنید.</span><button class="installment-btn" data-loan-amount="${desiredLoan}" data-years="${s.years}" data-plan-type="nik">محاسبه اقساط</button></div>`; });
             if (nikHtml) resultsHtml += `<div class="rate-section"><h4 class="rate-section-title">طرح نیک وام (نرخ کارمزد ۴٪)</h4>${nikHtml}</div>`;
             
             [23, 18, 14].forEach(rate => {
                 let shayanRateHtml = '';
-                finalScenarios.filter(s => s.plan === 'shayan' && s.shayanRate === rate).forEach(s => { hasAnyResults = true; shayanRateHtml += `<div class="result-item text-center py-2">با سپرده‌گذاری <strong>${formatNumberWithPersianSeparators(s.requiredDeposit)} تومان</strong> به مدت <strong>${toPersianNumeral(s.duration)} ماه</strong>، می‌توانید این وام (${s.loanType}) را با بازپرداخت <strong>${toPersianNumeral(s.years)} ساله</strong> دریافت کنید.</div>`; });
+                finalScenarios.filter(s => s.plan === 'shayan' && s.shayanRate === rate).forEach(s => { hasAnyResults = true; shayanRateHtml += `<div class="result-item"><span>با سپرده‌گذاری <strong>${formatNumberWithPersianSeparators(s.requiredDeposit)} تومان</strong> به مدت <strong>${toPersianNumeral(s.duration)} ماه</strong>، می‌توانید این وام (${s.loanType}) را با بازپرداخت <strong>${toPersianNumeral(s.years)} ساله</strong> دریافت کنید.</span><button class="installment-btn" data-loan-amount="${desiredLoan}" data-years="${s.years}" data-plan-type="shayan">محاسبه اقساط</button></div>`; });
                 if (shayanRateHtml) resultsHtml += `<div class="rate-section"><h4 class="rate-section-title">طرح شایان ۱ (دسته نرخ داخلی ${toPersianNumeral(rate)}٪)</h4>${shayanRateHtml}</div>`;
             });
 
@@ -390,6 +472,64 @@
 
             handleCalculation(hasAnyResults, resultsHtml);
         });
+        
+        // --- Installment calculation logic ---
+        resultsAreaWrapper.addEventListener('click', function(e) {
+            if (e.target.classList.contains('installment-btn')) {
+                const button = e.target;
+                const loanAmount = parseFloat(button.dataset.loanAmount);
+                const years = parseInt(button.dataset.years);
+                const planType = button.dataset.planType;
+                showInstallmentModal(loanAmount, years, planType);
+            }
+        });
+
+        function showInstallmentModal(loanAmount, years, planType) {
+            const n = years * 12;
+            let modalHtml = `<p><strong>مبلغ تسهیلات:</strong> ${formatNumberWithPersianSeparators(loanAmount)} تومان</p>`;
+            modalHtml += `<p><strong>مدت بازپرداخت:</strong> ${toPersianNumeral(years)} سال (${toPersianNumeral(n)} ماه)</p>`;
+
+            if (planType === 'nik') {
+                modalHtml += `<p><strong>نوع طرح:</strong> نیک وام (قرض الحسنه)</p><p><strong>نرخ کارمزد:</strong> ۴٪</p>`;
+                if (years > 1) { // New complex calculation for multi-year Nik loans
+                    let totalFee = 0;
+                    let remainingPrincipal = loanAmount;
+                    const yearlyPrincipalReduction = loanAmount / years;
+
+                    for (let i = 0; i < years; i++) {
+                        const yearlyFee = remainingPrincipal * 0.04;
+                        totalFee += yearlyFee;
+                        remainingPrincipal -= yearlyPrincipalReduction;
+                    }
+                    const totalRepayment = loanAmount + totalFee;
+                    const monthlyInstallment = totalRepayment / n;
+                    
+                    modalHtml += `<p><strong>مبلغ هر قسط:</strong> ${formatNumberWithPersianSeparators(monthlyInstallment)} تومان</p>`;
+                    modalHtml += `<p><strong>مبلغ کل بازپرداخت:</strong> ${formatNumberWithPersianSeparators(totalRepayment)} تومان</p>`;
+                    modalHtml += `<p><strong>کارمزد کل:</strong> ${formatNumberWithPersianSeparators(totalFee)} تومان</p>`;
+
+                } else { // Special calculation for 1-year loans
+                    const firstInstallment = loanAmount * 0.04;
+                    const subsequentInstallment = loanAmount / (n - 1);
+                    const totalRepayment = firstInstallment + loanAmount;
+                    modalHtml += `<p><strong>قسط اول (کارمزد):</strong> ${formatNumberWithPersianSeparators(firstInstallment)} تومان</p>`;
+                    modalHtml += `<p><strong>اقساط ${toPersianNumeral(n-1)} ماه بعد:</strong> هر قسط ${formatNumberWithPersianSeparators(subsequentInstallment)} تومان</p>`;
+                    modalHtml += `<p><strong>مبلغ کل بازپرداخت:</strong> ${formatNumberWithPersianSeparators(totalRepayment)} تومان</p>`;
+                }
+            } else { // Shayan
+                const r = 0.23 / 12;
+                const monthlyInstallment = loanAmount * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+                const totalRepayment = monthlyInstallment * n;
+                modalHtml += `<p><strong>نوع طرح:</strong> شایان</p>`;
+                modalHtml += `<p><strong>نرخ سود:</strong> ۲۳٪</p>`;
+                modalHtml += `<p><strong>مبلغ هر قسط:</strong> ${formatNumberWithPersianSeparators(monthlyInstallment)} تومان</p>`;
+                modalHtml += `<p><strong>مبلغ کل بازپرداخت:</strong> ${formatNumberWithPersianSeparators(totalRepayment)} تومان</p>`;
+                modalHtml += `<p><strong>سود کل:</strong> ${formatNumberWithPersianSeparators(totalRepayment - loanAmount)} تومان</p>`;
+            }
+            
+            installmentModalContent.innerHTML = modalHtml;
+            installmentModal.style.display = 'flex';
+        }
 
         // --- Rule Definitions (Unchanged) ---
         function calculateNikLoan(duration, rating, amount) { const r = []; const a = (p, y, c=null) => r.push({ loanAmount: amount * p, years: y, condition: c }); switch (duration) { case 1: a(0.27, 1); a(0.15, 2); a(0.10, 3); break; case 2: a(0.55, 1); a(0.30, 2); a(0.20, 3); if (rating==='A'||rating==='B') a(0.15, 4, 'ویژه رتبه‌های A و B'); break; case 3: a(0.80, 1); a(0.40, 2); a(0.30, 3); a(0.20, 4); a(0.15, 5); break; case 4: a(1.10, 1); a(0.55, 2); a(0.40, 3); if (rating==='A'||rating==='B') a(0.30, 4, 'ویژه رتبه‌های A و B'); a(0.20, 5); break; case 6: a(1.60, 1); a(0.80, 2); a(0.60, 3); if (rating==='A'||rating==='B') a(0.45, 4, 'ویژه رتبه‌های A و B'); a(0.30, 5); break; case 12: a(3.20, 1); a(1.60, 2); a(1.10, 3); if (rating==='A'||rating==='B') a(0.80, 4, 'ویژه رتبه‌های A و B'); a(0.60, 5); break; } return r; }
